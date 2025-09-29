@@ -14,6 +14,14 @@ spec:
     path: "ocp-setup/operators"
     repoURL: "https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git"
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
+  syncPolicy:
+    automated: {}
+    retry:
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 1m
+      limit: 2
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -32,3 +40,11 @@ spec:
     path: {{ (.source).path | default "ocp-setup/operators-cr" }}
     repoURL: "https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git"
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
+  syncPolicy:
+    automated: {}
+    retry:
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 1m
+      limit: 2
