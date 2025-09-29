@@ -1,0 +1,33 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: windguard-operators
+  namespace: {{ .namespace | default "openshift-gitops" }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    server: {{ .server | default "https://kubernetes.default.svc" }}
+  project: {{ .project | default "default" }}
+  source:
+    path: "ocp-setup/operators"
+    repoURL: "https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git"
+    targetRevision: {{ (.source).targetRevision | default "HEAD" }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: windguard-operators-cr
+  namespace: {{ .namespace | default "openshift-gitops" }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: {{ (.destination).namespace | default "" }}
+    name: {{ (.destination).name | default "" }}
+  project: {{ .project | default "default" }}
+  source:
+    path: {{ (.source).path | default "ocp-setup/operators-cr" }}
+    repoURL: "https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git"
+    targetRevision: {{ (.source).targetRevision | default "HEAD" }}

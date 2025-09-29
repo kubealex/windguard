@@ -1,0 +1,6 @@
+repoURL: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
+path: ocp-setup/operators
+
+operators:
+  - name: openshift-ai
+  - name: openshift-virtualization

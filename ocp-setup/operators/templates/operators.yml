@@ -1,0 +1,28 @@
+{{- range $.Values.operators }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .name }}-operator
+  namespace: {{ .namespace | default "openshift-gitops" }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: {{ (.destination).namespace | default "" }}
+    name: {{ (.destination).name | default "" }}
+    server: {{ .server | default "https://kubernetes.default.svc" }}
+  project: {{ .project | default "default" }}
+  source:
+    path: {{ (.source).path | default $.Values.path }}/{{ .name }}
+    repoURL: {{ (.source).repoURL | default $.Values.repoURL }}
+    targetRevision: {{ (.source).targetRevision | default "HEAD" }}
+  syncPolicy:
+    automated: {}
+    retry:
+      backoff:
+        duration: 30s
+        factor: 2
+        maxDuration: 1m
+      limit: 2
+{{- end}}
