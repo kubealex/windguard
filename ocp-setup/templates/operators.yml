@@ -24,6 +24,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
+    server: {{ .server | default "https://kubernetes.default.svc" }}
     namespace: {{ (.destination).namespace | default "" }}
     name: {{ (.destination).name | default "" }}
   project: {{ .project | default "default" }}
