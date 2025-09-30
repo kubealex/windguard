@@ -8,10 +8,10 @@ spec:
       managementState: Managed
     kserve:
       defaultDeploymentMode: RawDeployment
-      RawDeploymentServiceConfig: Headed  1
+      RawDeploymentServiceConfig: Headed
       managementState: Managed
       serving:
-        managementState: Removed  2
+        managementState: Removed
         name: knative-serving
     modelregistry:
       managementState: Removed
