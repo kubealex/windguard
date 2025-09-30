@@ -7,7 +7,12 @@ spec:
     codeflare:
       managementState: Managed
     kserve:
-      managementState: Removed
+      defaultDeploymentMode: RawDeployment
+      RawDeploymentServiceConfig: Headed  1
+      managementState: Managed
+      serving:
+        managementState: Removed  2
+        name: knative-serving
     modelregistry:
       managementState: Removed
       registriesNamespace: rhoai-model-registries
@@ -44,9 +49,6 @@ spec:
     managementState: Removed
     namespace: redhat-ods-monitoring
   serviceMesh:
-    auth:
-      audiences:
-        - 'https://kubernetes.default.svc'
     controlPlane:
       metricsCollection: Istio
       name: data-science-smcp
