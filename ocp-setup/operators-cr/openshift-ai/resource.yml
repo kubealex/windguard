@@ -31,3 +31,27 @@ spec:
       managementState: Managed
     trainingoperator:
       managementState: Managed
+---
+apiVersion: dscinitialization.opendatahub.io/v1
+kind: DSCInitialization
+metadata:
+  name: default-dsci
+spec:
+  applicationsNamespace: redhat-ods-applications
+  devFlags:
+    logmode: production
+  monitoring:
+    managementState: Removed
+    namespace: redhat-ods-monitoring
+  serviceMesh:
+    auth:
+      audiences:
+        - 'https://kubernetes.default.svc'
+    controlPlane:
+      metricsCollection: Istio
+      name: data-science-smcp
+      namespace: istio-system
+    managementState: Removed
+  trustedCABundle:
+    customCABundle: ''
+    managementState: Removed
