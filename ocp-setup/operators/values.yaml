@@ -1,4 +1,5 @@
-repoURL: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
+# repourl: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
+repourl: https://github.com/kubealex/windguard.git
 path: ocp-setup/operators
 
 operators:

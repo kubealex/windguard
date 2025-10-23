@@ -15,7 +15,7 @@ spec:
   project: {{ .project | default "default" }}
   source:
     path: {{ $.Values.path }}/{{ .name }}
-    repoURL: {{ (.source).repoURL | default $.Values.repoURL }}
+    repourl: {{ (.source).# repourl | default $.Values.# repourl }}
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
   syncPolicy:
     automated: {}
