@@ -38,7 +38,7 @@ spec:
   project: {{ .project | default "default" }}
   source:
     path: {{ (.source).path | default "ocp-setup/operators-cr" }}
-    # repoURL: "https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git"
+    repoURL: {{ (.source).repoURL | default $.Values.repourl }}
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
   syncPolicy:
     automated: {}
