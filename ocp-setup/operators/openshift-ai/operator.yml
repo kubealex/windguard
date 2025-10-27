@@ -22,4 +22,4 @@ spec:
   name: rhods-operator
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  startingCSV: rhods-operator.2.22.1
+#  startingCSV: rhods-operator.2.22.1

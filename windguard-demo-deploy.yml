@@ -9,7 +9,7 @@ spec:
   project: default
   source:
     path: ocp-setup
-    repourl: https://github.com/kubealex/windguard.git
+    repoURL: https://github.com/kubealex/windguard.git
     # repourl: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
     targetRevision: HEAD
   syncPolicy:
