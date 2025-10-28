@@ -8,7 +8,6 @@ spec:
       managementState: Managed
     kserve:
       defaultDeploymentMode: RawDeployment
-      RawDeploymentServiceConfig: Headed
       managementState: Managed
       serving:
         managementState: Removed
