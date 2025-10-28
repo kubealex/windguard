@@ -1,0 +1,48 @@
+---
+apiVersion: ocpvirt.io/v1
+kind: VirtualMachine
+metadata:
+  labels:
+    ocpvirt.io/vm: windguard-demo
+  name: windguard-demo-vm
+spec:
+  dataVolumeTemplates:
+  - metadata:
+      name: windguard-demo-vm-dv
+    spec:
+      pvc:
+        accessModes:
+        - ReadWriteMany
+        resources:
+          requests:
+            storage: 50Gi
+        storageClassName: ocs-storagecluster-cephfs
+      source:
+        registry:
+          url: docker://quay.io/kubealex/windguard-demo-vm:latest
+  running: true
+  template:
+    metadata:
+      labels:
+        ocpvirt.io/vm: windguard-demo-vm-ocpvirt
+    spec:
+      domain:
+        devices:
+          disks:
+          - disk:
+              bus: virtio
+            name: datavolumedisk1
+        resources:
+          requests:
+            memory: 8Gi
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: false
+        cpu:
+          cores: 8
+      terminationGracePeriodSeconds: 0
+      volumes:
+      - dataVolume:
+          name: windguard-demo-vm-dv
+        name: datavolumedisk1
