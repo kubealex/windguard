@@ -17,6 +17,20 @@ TIMEOUT=600                    # Timeout per application in seconds
 CONSOLE_RESOURCE="console.operator.openshift.io/cluster"
 # ===============================
 
+# ======== COLORS ========
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+# =========================
+
+# ---- Helper: timestamped log ----
+log() { echo -e "[$(date +'%H:%M:%S')] $*"; }
+
+# ---- Handle Ctrl+C gracefully ----
+trap 'log "${YELLOW}🛑 Interrupted by user.${NC}"; exit 130' INT
+
 # ---- Helper: usage message ----
 usage() {
   echo "Usage: $0 <app1> [app2 ...]"
@@ -37,7 +51,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # ---- Apply manifests section ----
-echo "🚀 Applying manifests to the cluster..."
+log "${BLUE}🚀 Applying manifests to the cluster...${NC}"
 # ===========================================================
 # 🧱 BOILERPLATE SECTION — add your manifests below
 # Example:
@@ -45,10 +59,10 @@ echo "🚀 Applying manifests to the cluster..."
 # oc apply -f ./manifests/configmap.yaml
 # oc apply -k ./kustomize/overlays/prod
 # ===========================================================
-echo "(No manifests applied yet — add your oc apply commands above)"
+log "(No manifests applied yet — add your oc apply commands above)"
 echo
 
-# ---- Function to get status ----
+# ---- Function to get ArgoCD app status ----
 get_status() {
   local app="$1"
   local sync health
@@ -63,27 +77,27 @@ wait_for_app() {
   local start elapsed sync health
   start=$(date +%s)
 
-  echo "🔍 Checking ArgoCD Application: $app"
+  log "${BLUE}🔍 Checking ArgoCD Application:${NC} $app"
 
   while true; do
     read -r sync health <<<"$(get_status "$app")"
 
     if [ -z "$sync" ]; then
-      echo "❌ Application '$app' not found in namespace '$NAMESPACE'."
+      log "${RED}❌ Application '$app' not found in namespace '$NAMESPACE'.${NC}"
       return 2
     fi
 
     if [[ "$sync" == "Synced" && "$health" == "Healthy" ]]; then
-      echo "✅ $app is Synced and Healthy."
+      log "${GREEN}✅ $app is Synced and Healthy.${NC}"
       return 0
     fi
 
-    echo "⏳ $app -> Sync=$sync, Health=$health (waiting...)"
+    log "${YELLOW}⏳ $app -> Sync=$sync, Health=$health (waiting...)${NC}"
     sleep "$INTERVAL"
 
     elapsed=$(( $(date +%s) - start ))
     if (( elapsed >= TIMEOUT )); then
-      echo "❌ Timeout reached for $app after ${TIMEOUT}s."
+      log "${RED}❌ Timeout reached for $app after ${TIMEOUT}s.${NC}"
       return 1
     fi
   done
@@ -94,24 +108,24 @@ for app in "$@"; do
   wait_for_app "$app" || exit $?
 done
 
-echo "🎉 All specified applications are Synced and Healthy."
+log "${GREEN}🎉 All specified applications are Synced and Healthy.${NC}"
 echo
 
 # ---- Patch the OpenShift Console to add flightctl-plugin ----
-echo "🧩 Patching OpenShift Console to include 'flightctl-plugin'..."
+log "${BLUE}🧩 Patching OpenShift Console to include 'flightctl-plugin'...${NC}"
 
 # Check if plugin is already present
 if oc get "$CONSOLE_RESOURCE" -o jsonpath='{.spec.plugins}' | grep -q '"flightctl-plugin"'; then
-  echo "✅ 'flightctl-plugin' is already present in spec.plugins"
+  log "${GREEN}✅ 'flightctl-plugin' already present in spec.plugins${NC}"
 else
-  oc patch "$CONSOLE_RESOURCE" --type=json \
-    -p='[{"op":"add","path":"/spec/plugins/-","value":"flightctl-plugin"}]'
+  # Use safer merge patch to handle cases with missing .spec.plugins
+  oc patch "$CONSOLE_RESOURCE" --type=merge -p '{"spec": {"plugins": ["flightctl-plugin"]}}'
   if [ $? -eq 0 ]; then
-    echo "✅ Successfully added 'flightctl-plugin' to Console spec.plugins"
+    log "${GREEN}✅ Successfully added 'flightctl-plugin' to Console spec.plugins${NC}"
   else
-    echo "❌ Failed to patch the Console resource."
+    log "${RED}❌ Failed to patch the Console resource.${NC}"
     exit 3
   fi
 fi
 
-echo "🏁 Done."
+log "${GREEN}🏁 Deployment complete — all systems operational.${NC}"
