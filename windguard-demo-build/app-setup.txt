@@ -1,0 +1,10 @@
+Diagram here https://app.diagrams.net/#G18wGm-4luCimHQ5q6LkyOu9GjDugGcm-V#%7B%22pageId%22%3A%226-LawE0qHYWR1G7LZchB%22%7D
+
+MQTT Broker: podman run -d  --replace --privileged --name mosquitto -p 1883:1883 -v "$PWD/mosquitto/config:/mosquitto/config" -v "$PWD/mosquitto/data:/mosquitto/data" -v "$PWD/mosquitto/log:/mosquitto/log" --network kind  eclipse-mosquitto:latest
+
+Dashboard (HMI FUXA) : podman run -d --replace -p 1881:1881 --name my-hmi  --privileged --network kind -v "$PWD/FUXA/fuxa_appdata:/usr/src/app/FUXA/server/_appdata" -v "$PWD/FUXA/fuxa_db:/usr/src/app/FUXA/server/_db" -v "$PWD/FUXA/fuxa_logs:/usr/src/app/FUXA/server/_logs" -v "$PWD/FUXA/fuxa_images:/usr/src/app/FUXA/server/_images" frangoteam/fuxa:latest
+
+Python Sim App: 
+
+
+the python app will read data from the dataset (https://zenodo.org/records/10958775), filtering some of the features available for the 3 wind farms and will send the data through to the MQTT Broker. Based on some easy logic it will also produce on a different topic prediction of power produced and possible faults. HMI will connect to MQTT Broker and show real time data, based on specific topics.
