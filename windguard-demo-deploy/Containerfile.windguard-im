@@ -1,0 +1,37 @@
+FROM registry.stage.redhat.io/rhel10/rhel-bootc:10.1 as builder
+#FROM registry.redhat.io/rhel10/rhel-bootc:10.1 as builder
+
+RUN /usr/libexec/bootc-base-imagectl build-rootfs --manifest=minimal /target-rootfs
+# Create a new, empty image from scratch.
+FROM scratch
+# Copy the root file system built in the previous step into this image.
+COPY --from=builder /target-rootfs/ /
+# Apply customizations to the image. This syntax uses "heredocs" https://www.docker.com/blog/introduction-to-heredocs-in-dockerfiles/ to pass multi-line arguments in a more readable format.
+RUN <<EORUN
+# Set pipefail to display failures within the heredoc and avoid false-positive successful builds.
+set -xeuo pipefail
+dnf -y install NetworkManager vim mkpasswd sudo podman openssh-server
+dnf clean all
+rm /var/{log,cache,lib}/* -rf
+pass=$(mkpasswd --method=SHA-512 --rounds=4096 redhat) && useradd -m -G wheel windguard-user -p $pass
+echo "%wheel        ALL=(ALL)       NOPASSWD: ALL" > /etc/sudoers.d/wheel-sudo
+EORUN
+
+# COPY ./fuxa.container /usr/share/containers/systemd/fuxa.container
+# COPY ./windguard.container /usr/share/containers/systemd/tailwind.container
+COPY ./mosquitto.container /usr/share/containers/systemd/mosquitto.container
+
+# ADD TMPFILES FOR APPS
+# COPY ./files/00-mosquitto-tmpfile.conf /usr/lib/tmpfiles.d/
+# ADD FLIGHTCTL
+#
+#s
+
+# Define required labels for this bootc image to be recognized as such.
+LABEL containers.bootc 1
+LABEL ostree.bootable 1
+# Optional labels that only apply when running this image as a container. These keep the default entry point running under systemd.
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]
+# Run the bootc linter to avoid encountering certain bugs and maintain content quality. Place this command last in your Containerfile.
+RUN bootc container lint
