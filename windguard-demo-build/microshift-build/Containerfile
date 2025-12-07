@@ -3,8 +3,10 @@ FROM registry.redhat.io/rhel9/rhel-bootc:9.6
 ARG USHIFT_VER=4.20
 RUN dnf config-manager \
         --set-enabled rhocp-${USHIFT_VER}-for-rhel-9-$(uname -m)-rpms \
-        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms
-RUN dnf install -y firewalld microshift microshift-ai-model-serving && \
+        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms \
+        --set-enabled rhacm-2.4-for-rhel-<version>-$(uname -m)-rpms
+
+RUN dnf install -y firewalld microshift microshift-ai-model-serving flightctl-agent && \
     systemctl enable microshift && \
     dnf clean all
 
@@ -24,6 +26,7 @@ RUN firewall-offline-cmd --zone=public --add-port=22/tcp && \
 RUN mkdir -p /etc/ostree
 ADD pull-secret /etc/crio/openshift-pull-secret
 ADD auth.json /etc/ostree/auth.json
+ADD config.yaml /etc/flightctl/
 RUN chmod 600 /etc/crio/openshift-pull-secret
 
 RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
@@ -37,4 +40,6 @@ ExecStart=/usr/bin/mount --make-rshared /
 [Install]
 WantedBy=multi-user.target
 EOF
-RUN systemctl enable microshift-make-rshared.service
+RUN systemctl enable microshift-make-rshared.service && \
+    systemctl enable flightctl-agent.service && \
+    systemctl mask bootc-fetch-apply-updates.timer

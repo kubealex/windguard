@@ -1,0 +1,10 @@
+openshift-gitops-repository.yml
+
+pull-secret
+auth.json
+output/*.log
+output/*.json
+output/qcow2/**
+client-*
+ca.crt
+config.yaml
