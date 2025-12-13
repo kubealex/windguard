@@ -4,7 +4,7 @@ ARG USHIFT_VER=4.20
 RUN dnf config-manager \
         --set-enabled rhocp-${USHIFT_VER}-for-rhel-9-$(uname -m)-rpms \
         --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms \
-        --set-enabled rhacm-2.14-for-rhel-9-$(uname -m)-rpms
+        --set-enabled rhacm-2.15-for-rhel-9-$(uname -m)-rpms
 
 RUN dnf install -y firewalld microshift microshift-ai-model-serving flightctl-agent && \
     systemctl enable microshift && \
