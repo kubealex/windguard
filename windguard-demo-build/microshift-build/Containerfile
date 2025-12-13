@@ -28,6 +28,7 @@ ADD pull-secret /etc/crio/openshift-pull-secret
 ADD auth.json /etc/ostree/auth.json
 ADD config.yaml /etc/flightctl/
 RUN chmod 600 /etc/crio/openshift-pull-secret
+ADD manifests/ /etc/microshift/manifests/
 
 RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
 [Unit]
