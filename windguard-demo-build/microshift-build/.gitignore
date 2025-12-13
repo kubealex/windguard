@@ -8,3 +8,4 @@ output/qcow2/**
 client-*
 ca.crt
 config.yaml
+flightctl

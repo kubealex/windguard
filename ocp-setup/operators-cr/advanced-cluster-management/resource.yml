@@ -5,8 +5,6 @@ metadata:
   name: multiclusterhub
   namespace: open-cluster-management
 spec:
-  availabilityConfig: Basic
-  enableClusterBackup: false
   overrides:
     components:
       - configOverrides: {}
@@ -54,3 +52,6 @@ spec:
       - configOverrides: {}
         enabled: false
         name: siteconfig
+      - configOverrides: {}
+        enabled: false
+        name: cnv-mtv-integrations-preview
