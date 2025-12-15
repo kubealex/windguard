@@ -45,7 +45,7 @@ ADD config.yaml /etc/flightctl/
 ADD files/workload-manifests/ /etc/microshift/manifests/
 ADD files/microshift-config/ovn.yaml /etc/microshift/
 
-RUN sed "s|OCP_CLUSTER_DOMAIN|$OCP_CLUSTER_DOMAIN|g" /etc/microshift/manifests/example-deployment.yml
+RUN sed -i "s|OCP_CLUSTER_DOMAIN|$OCP_CLUSTER_DOMAIN|g" /etc/microshift/manifests/example-deployment.yml
 
 RUN chmod 600 /etc/crio/openshift-pull-secret
 
