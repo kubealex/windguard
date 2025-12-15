@@ -1,10 +1,11 @@
 ---
-apiVersion: ocpvirt.io/v1
+apiVersion: kubevirt.io/v1
 kind: VirtualMachine
 metadata:
   labels:
     ocpvirt.io/vm: windguard-demo
   name: windguard-demo-vm
+  namespace: windguard-demo
 spec:
   dataVolumeTemplates:
   - metadata:
@@ -16,7 +17,6 @@ spec:
         resources:
           requests:
             storage: 50Gi
-        storageClassName: ocs-storagecluster-cephfs
       source:
         registry:
           url: docker://QCOW_IMAGE
