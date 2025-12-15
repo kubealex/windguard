@@ -1,0 +1,11 @@
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: windguard-demo-dashboard
+spec:
+  subdomain: windguard-dashboard
+  to:
+    kind: Service
+    name: windguard-demo-vm-http
+  port:
+    targetPort: http

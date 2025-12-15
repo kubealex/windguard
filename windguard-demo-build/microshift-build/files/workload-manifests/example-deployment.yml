@@ -42,6 +42,7 @@ metadata:
   namespace: httpd
 spec:
   to:
+    host: windguard-dashboard.OCP_CLUSTER_DOMAIN
     kind: Service
     name: example
   port:
