@@ -19,7 +19,7 @@ spec:
         storageClassName: ocs-storagecluster-cephfs
       source:
         registry:
-          url: docker://quay.io/kubealex/windguard-demo-vm:latest
+          url: docker://QCOW_IMAGE
   running: true
   template:
     metadata:
