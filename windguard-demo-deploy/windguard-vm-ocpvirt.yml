@@ -34,13 +34,13 @@ spec:
             name: datavolumedisk1
         resources:
           requests:
-            memory: 8Gi
+            memory: 4Gi
         firmware:
           bootloader:
             efi:
               secureBoot: false
         cpu:
-          cores: 8
+          cores: 4
       terminationGracePeriodSeconds: 0
       volumes:
       - dataVolume:
