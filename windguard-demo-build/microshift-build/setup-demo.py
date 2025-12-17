@@ -98,16 +98,6 @@ def main():
     log(f"Private Registry: {env['REGISTRY_URL']}/{env['REGISTRY_USER']}", Colors.YELLOW)
     log(f"Boot Image: {env['BOOTC_IMAGE']}", Colors.YELLOW)
 
-    # 1. Setup operators
-    setup_script = "./setup-demo.sh"
-    if Path(setup_script).exists():
-        operator_list = ' '.join(OPERATORS)
-        execute_step(
-            "Setting up operators",
-            f"{setup_script} {operator_list}",
-            env=env
-        )
-
     # 2. Enable repositories
     repo_args = ' '.join([f"--enable {repo}" for repo in REPOSITORIES])
     execute_step(
