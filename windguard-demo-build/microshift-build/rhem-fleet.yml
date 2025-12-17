@@ -9,7 +9,7 @@ spec:
  template:
   spec:
     os:
-      image: quay.io/kubealex/windguard-microshift:edgemanager
+      image: BOOTC_IMAGE
     config:
       - name: acm-crd
         httpRef:

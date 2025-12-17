@@ -36,8 +36,8 @@ PACKAGES = [
 
 BUILD_DIR = "windguard-demo-build/microshift-build/"
 IMAGE_BASE = "windguard-microshift"
-IMAGE_TAG = "demodot"
-QCOW2_TAG = "demodot-qcow2"
+IMAGE_TAG = "demo"
+QCOW2_TAG = "demo-qcow2"
 BOOTC_BUILDER = "registry.redhat.io/rhel9/bootc-image-builder:latest"
 MICROSHIFT_KUBECONFIG = "/var/lib/microshift/resources/kubeadmin/kubeconfig"
 
