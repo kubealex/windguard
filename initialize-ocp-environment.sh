@@ -223,6 +223,8 @@ def main():
         env=env
     )
 
+# NUMBER 15 Must happen in another directory that is called windguard-demo-deploy
+
     # 15. Deploy to OpenShift Virtualization
     execute_step(
         "Creating namespace and services",
@@ -233,13 +235,6 @@ def main():
     execute_step(
         "Deploying VM to OpenShift Virtualization",
         f"sed 's|QCOW_IMAGE|{env['QCOW_IMAGE']}|g' windguard-vm-ocpvirt.yml | oc apply -f -",
-        env=env
-    )
-
-    # 16. Verify MicroShift
-    execute_step(
-        "Verifying MicroShift pods",
-        f"oc --kubeconfig {MICROSHIFT_KUBECONFIG} get pods -A",
         env=env
     )
 

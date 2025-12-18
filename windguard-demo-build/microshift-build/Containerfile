@@ -2,53 +2,114 @@ FROM registry.redhat.io/rhel9/rhel-bootc:9.6
 
 ARG USHIFT_VER=4.20
 ARG OCP_CLUSTER_DOMAIN
-
-RUN dnf config-manager \
-        --set-enabled rhocp-${USHIFT_VER}-for-rhel-9-$(uname -m)-rpms \
-        --set-enabled fast-datapath-for-rhel-9-$(uname -m)-rpms \
-        --set-enabled rhacm-2.15-for-rhel-9-$(uname -m)-rpms
-
-RUN dnf install -y firewalld microshift microshift-ai-model-serving flightctl-agent && \
-    systemctl enable microshift && \
-    dnf clean all
-
-# Create a default 'redhat' user with the specified password.
-# Add it to the 'wheel' group to allow for running sudo commands.
 ARG USER_PASSWD=redhat
-RUN useradd -m -d /var/home/redhat -G wheel redhat && \
+
+# ------------------------------------------------------------
+# Enable required repositories
+# ------------------------------------------------------------
+RUN arch="$(uname -m)" && \
+    dnf config-manager \
+        --set-enabled rhocp-${USHIFT_VER}-for-rhel-9-${arch}-rpms \
+        --set-enabled fast-datapath-for-rhel-9-${arch}-rpms \
+        --set-enabled rhacm-2.15-for-rhel-9-${arch}-rpms
+
+# ------------------------------------------------------------
+# Install required packages
+# ------------------------------------------------------------
+RUN dnf install -y \
+        firewalld \
+        microshift \
+        microshift-ai-model-serving \
+        flightctl-agent && \
+    dnf clean all && \
+    rm -rf /var/cache/dnf
+
+# ------------------------------------------------------------
+# Create demo user
+# ------------------------------------------------------------
+RUN useradd \
+        -m \
+        -d /var/home/redhat \
+        -G wheel \
+        redhat && \
     echo "redhat:${USER_PASSWD}" | chpasswd
 
-# Mandatory firewall configuration
-RUN firewall-offline-cmd --zone=public --add-port=22/tcp --add-port=80/tcp --add-port=443/tcp && \
-    firewall-offline-cmd --zone=trusted --add-source=10.42.0.0/16 && \
-    firewall-offline-cmd --zone=trusted --add-source=169.254.169.1
+# ------------------------------------------------------------
+# Configure firewall (offline)
+# ------------------------------------------------------------
+RUN firewall-offline-cmd \
+        --zone=public \
+        --add-port=22/tcp \
+        --add-port=80/tcp \
+        --add-port=443/tcp && \
+    firewall-offline-cmd \
+        --zone=trusted \
+        --add-source=10.42.0.0/16 && \
+    firewall-offline-cmd \
+        --zone=trusted \
+        --add-source=169.254.169.1
 
-
-# Create a systemd unit to recursively make the root filesystem subtree
-# shared as required by OVN images
+# ------------------------------------------------------------
+# OVN requirement: make root filesystem rshared
+# ------------------------------------------------------------
 RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
 [Unit]
 Description=Make root filesystem shared
 Before=microshift.service
 ConditionVirtualization=container
+
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/mount --make-rshared /
+
 [Install]
 WantedBy=multi-user.target
 EOF
 
-RUN mkdir -p /etc/ostree
-ADD pull-secret /etc/crio/openshift-pull-secret
-ADD auth.json /etc/ostree/auth.json
-ADD config.yaml /etc/flightctl/
-ADD files/workload-manifests/ /etc/microshift/manifests/
-ADD files/microshift-config/ovn.yaml /etc/microshift/
-
-RUN sed -i "s|OCP_CLUSTER_DOMAIN|$OCP_CLUSTER_DOMAIN|g" /etc/microshift/manifests/example-deployment.yml
-
-RUN chmod 600 /etc/crio/openshift-pull-secret
-
+# ------------------------------------------------------------
+# Enable and mask systemd units
+# ------------------------------------------------------------
 RUN systemctl enable microshift-make-rshared.service && \
     systemctl enable flightctl-agent.service && \
-    systemctl mask bootc-fetch-apply-updates.timer
+    systemctl mask bootc-fetch-apply-updates.timer && \
+    systemctl enable microshift
+
+
+# ------------------------------------------------------------
+# Create required directories
+# ------------------------------------------------------------
+RUN mkdir -p /etc/ostree
+
+# ------------------------------------------------------------
+# Copy secrets and configuration
+# ------------------------------------------------------------
+COPY pull-secret /etc/crio/openshift-pull-secret
+COPY auth.json /etc/ostree/auth.json
+
+RUN chmod 600 /etc/crio/openshift-pull-secret && \
+    chmod 600 /etc/ostree/auth.json
+
+COPY config.yaml /etc/flightctl/
+
+# ------------------------------------------------------------
+# Copy MicroShift configuration and manifests
+# ------------------------------------------------------------
+
+RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
+[Unit]
+Description=Make root filesystem shared
+Before=microshift.service
+ConditionVirtualization=container
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/mount --make-rshared /
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+COPY files/microshift-config/ /etc/microshift/
+RUN  sed -i \
+        "s|OCP_CLUSTER_DOMAIN|${OCP_CLUSTER_DOMAIN}|g" \
+        /etc/microshift/config.d/dns.yaml

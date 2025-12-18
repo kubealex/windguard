@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
         - name: httpd
-          image: registry.redhat.io/ubi10/httpd-24
+          image: registry.redhat.io/ubi10/httpd-24:latest
 ---
 apiVersion: v1
 kind: Service
@@ -42,7 +42,6 @@ metadata:
   namespace: httpd
 spec:
   to:
-    host: windguard-dashboard.OCP_CLUSTER_DOMAIN
     kind: Service
     name: example
   port:

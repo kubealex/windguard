@@ -3,3 +3,4 @@ openshift-gitops-repository.yml
 .vscode/
 dataset/
 apps-description.md
+demo-config.yaml

@@ -1,68 +1,98 @@
-# Building the MicroShift device image
+# MicroShift Device Image Build Automation
 
-In this section, we are going to build the
+Configuration-driven automation for building MicroShift device images with FlightCtl integration and OpenShift Virtualization deployment.
 
-export OCP_CLUSTER_DOMAIN=ocp.ocpdemo.labs
-subscription-manager repos --enable rhacm-2.15-for-rhel-9-x86_64-rpms --enable rhocp-4.20-for-rhel-9-x86_64-rpms
+## Prerequisites
 
-dnf install flightctl container-tools openshift-clients -y
+- RHEL 9 system with subscription-manager access
+- Access to OpenShift cluster
+- Podman installed
+- Python 3.9+ (for Python script) or Bash 4+ (for shell script)
+- PyYAML library (for Python script): `pip install pyyaml`
 
-cd windguard-demo-build/microshift-build/
+## Configuration
 
-podman login quay.io --authfile=auth.json
-podman login registry.redhat.io --authfile=auth.json
+Only **dynamic values** need to be configured in `config.yaml`:
 
-oc login -u admin -p openshift https://api.$OCP_CLUSTER_DOMAIN:6443
+```yaml
+# Red Hat Registry Configuration
+redhat_registry:
+  username: "your-redhat-username"
+  password: "your-redhat-password"
 
-oc get secret/pull-secret -n openshift-config --template='{{index .data ".dockerconfigjson" | base64decode}}' > pull-secret
+# Private Registry Configuration (Quay.io or custom)
+private_registry:
+  url: "quay.io"  # Change if using different registry
+  username: "your-registry-user"
+  password: "your-registry-password"
 
+# OpenShift Cluster Configuration
+ocp_cluster:
+  domain: "cluster-k7jhl.dynamic.redhatworkshops.io" # The domain of the cluster, without the *.apps
+  username: "your-cluster-admin-user"
+  password: "your-cluster-password"
+```
 
-export RHEM_API_SERVER_URL=$(oc get route -n open-cluster-management flightctl-api-route -o json | jq -r .spec.host)
-flightctl login --username=admin --password=openshift https://$RHEM_API_SERVER_URL
+### What's NOT in the config
 
+The following are **hardcoded** in the scripts as they rarely change:
 
-[root@rhel9-server microshift-build]# flightctl version
-Client Version: v0.10.0
-Server Version: v0.10.0
+- **Operators**: ACM, OpenShift AI, OpenShift Virtualization
+- **Repositories**: RHACM and RHOCP repos for RHEL 9
+- **Packages**: flightctl, container-tools, openshift-clients
+- **Image names**: windguard-microshift (base), demodot/demodot-qcow2 (tags)
+- **File paths**: windguard-demo-build/microshift-build/, standard k8s manifests
+- **URLs derived from domain**: `api.{domain}:6443`, `*.apps.{domain}`
 
+## Usage
 
-export BOOTC_IMAGE=quay.io/kubealex/windguard-microshift:edgemanager
+### Python Script (Recommended)
 
-sed -i "s|BOOTC_IMAGE|$BOOTC_IMAGE|g" rhem-fleet.yml
+```bash
+# Install dependencies
+pip install pyyaml
 
-[root@rhel9-server microshift-build]# flightctl apply -f rhem-fleet.yml
-fleet: applying rhem-fleet.yml/fleet-acm: 200 OK
+# Make executable
+chmod +x build-microshift.py
 
+# Run with default config.yaml
+./build-microshift.py
 
-flightctl certificate request --signer=enrollment --expiration=365d --output=embedded > config.yaml
+# Run with custom config
+./build-microshift.py my-config.yaml
+```
 
-export REGISTRY_URL=quay.io REGISTRY_USER=kubealex
-podman build --rm --no-cache -t $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:latest .
-podman push $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:latest
+## Build Process
 
-podman build --rm --no-cache -t $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:ocpvirt-qcow2 -f Containerfile.ocpvirt .
-podman push $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:ocpvirt-qcow2
+The automation performs these steps in order:
 
-podman run --rm -it --privileged --pull=newer \
-    --security-opt label=type:unconfined_t \
-    -v "${PWD}/output":/output \
-    -v /var/lib/containers/storage:/var/lib/containers/storage \
-    registry.redhat.io/rhel9/bootc-image-builder:latest \
-    --type qcow2 \
-    $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:latest
+1. **Repository Configuration** - Enables RHACM and RHOCP repositories
+2. **Package Installation** - Installs FlightCtl, container tools, and OCP clients
+3. **Registry Authentication** - Logs into private registry and registry.redhat.io
+4. **OpenShift Login** - Authenticates to `https://api.{domain}:6443`
+5. **Pull Secret Extraction** - Retrieves cluster pull secret
+6. **FlightCtl Setup** - Configures FlightCtl API connection and certificates
+7. **Fleet Configuration** - Applies FlightCtl fleet template
+8. **Bootc Image Build** - Builds and pushes bootc container image
+9. **QCOW2 Generation** - Creates QCOW2 disk image using bootc-image-builder
+10. **QCOW2 Container** - Packages QCOW2 for OpenShift Virtualization
+11. **VM Deployment** - Deploys VM to OpenShift Virtualization
 
-podman build --rm --no-cache -t $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:ocpvirt-qcow2 -f Containerfile.ocpvirt .
-podman push $REGISTRY_URL/$REGISTRY_USER/windguard-microshift:ocpvirt-qcow2
+## Output
 
-export QCOW_IMAGE=$REGISTRY_URL/$REGISTRY_USER/windguard-microshift:ocpvirt-qcow2
+Successful build produces:
 
-oc apply -f windguard-namespace.yml
-sed -i "s|QCOW_IMAGE|$QCOW_IMAGE|g" windguard-vm-ocpvirt.yml
-oc apply -f windguard-vm.yml
-virt-install \
-    --name rhel-bootc-vm \
-    --vcpus 4 \
-    --memory 4096 \
-    --import --disk ./output/qcow2/disk.qcow2,format=qcow2 \
-    --os-variant rhel10.0 \
-    --network network=default
+- **Bootc container image**: `{private_registry.url}/{private_registry.username}/windguard-microshift:demodot`
+- **QCOW2 disk image**: `./windguard-demo-build/microshift-build/output/qcow2/disk.qcow2`
+- **QCOW2 container image**: `{private_registry.url}/{private_registry.username}/windguard-microshift:demodot-qcow2`
+- **Running VM** in OpenShift Virtualization
+
+## Security Notes
+
+⚠️ **Important:** The `config.yaml` file contains credentials.
+
+**Best Practices:**
+- Do not commit credentials to version control
+- Restrict file permissions: `chmod 600 config.yaml`
+- Use `.gitignore` to exclude config.yaml
+- Consider using environment variables for CI/CD

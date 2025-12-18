@@ -8,9 +8,8 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: ocp-setup
+    path: ocp-setup/gitops
     repoURL: https://github.com/kubealex/windguard.git
-    # repoURL: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
     targetRevision: HEAD
   syncPolicy:
     automated: {}
