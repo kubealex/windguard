@@ -10,55 +10,55 @@ spec:
   spec:
     os:
       image: BOOTC_IMAGE
-      config:
-        - name: acm-crd
-          httpRef:
-            suffix: /agent-registration/crds/v1
-            filePath: /var/local/acm-import/crd.yaml
-            repository: acm-registration
-        - name: acm-import
-          httpRef:
-            suffix: /agent-registration/manifests/{{.metadata.name}}
-            filePath: /var/local/acm-import/import.yaml
-            repository: acm-registration
-        - name: apply-acm-manifests
-          inline:
-            - path: /etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml
-              content: |
-                - if:
-                  - path: /var/local/acm-import/crd.yaml
-                    op: [created]
-                  run: kubectl apply -f /var/local/acm-import/crd.yaml
-                  envVars:
-                    KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
-                - if:
-                  - path: /var/local/acm-import/import.yaml
-                    op: [created]
-                  run: kubectl apply -f /var/local/acm-import/import.yaml
-                  envVars:
-                    KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
-        - name: windguard-microshift
-          gitRef:
-            path: /fleet-configuration/
-            repository: windguard-microshift
-            targetRevision: main
-        - name: microshift-restart
-          inline:
-            - path: /etc/flightctl/hooks.d/afterupdating/00-microshift-restart.yaml
-              content: |
-                - if:
-                  - path: /etc/microshift/manifests/kustomization.yaml
-                    op: [created, updated]
-                  - path: /etc/microshift/config.d/dns.yaml
-                    op: [created, updated]
-                  - path: /etc/microshift/ovn.yaml
-                    op: [created, updated]
-                  run: systemctl restart microshift
-                  timeout: 5m
-            - path: /etc/flightctl/hooks.d/beforeupdating/00-clean-resources.yaml
-              content: |-
-                - if:
-                  - path: /etc/microshift/manifests/kustomization.yaml
-                    op: [removed]
-                  run: oc delete -k /etc/microshift/manifests/ --kubeconfig /var/lib/microshift/resources/kubeadmin/kubeconfig
-                  timeout: 5m
+    config:
+      - name: acm-crd
+        httpRef:
+          suffix: /agent-registration/crds/v1
+          filePath: /var/local/acm-import/crd.yaml
+          repository: acm-registration
+      - name: acm-import
+        httpRef:
+          suffix: /agent-registration/manifests/{{.metadata.name}}
+          filePath: /var/local/acm-import/import.yaml
+          repository: acm-registration
+      - name: apply-acm-manifests
+        inline:
+          - path: /etc/flightctl/hooks.d/afterupdating/50-acm-registration.yaml
+            content: |
+              - if:
+                - path: /var/local/acm-import/crd.yaml
+                  op: [created]
+                run: kubectl apply -f /var/local/acm-import/crd.yaml
+                envVars:
+                  KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+              - if:
+                - path: /var/local/acm-import/import.yaml
+                  op: [created]
+                run: kubectl apply -f /var/local/acm-import/import.yaml
+                envVars:
+                  KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
+      - name: windguard-microshift
+        gitRef:
+          path: /fleet-configuration/
+          repository: windguard-microshift
+          targetRevision: main
+      - name: microshift-restart
+        inline:
+          - path: /etc/flightctl/hooks.d/afterupdating/00-microshift-restart.yaml
+            content: |
+              - if:
+                - path: /etc/microshift/manifests/kustomization.yaml
+                  op: [created, updated]
+                - path: /etc/microshift/config.d/dns.yaml
+                  op: [created, updated]
+                - path: /etc/microshift/ovn.yaml
+                  op: [created, updated]
+                run: systemctl restart microshift
+                timeout: 5m
+          - path: /etc/flightctl/hooks.d/beforeupdating/00-clean-resources.yaml
+            content: |-
+              - if:
+                - path: /etc/microshift/manifests/kustomization.yaml
+                  op: [removed]
+                run: oc delete -k /etc/microshift/manifests/ --kubeconfig /var/lib/microshift/resources/kubeadmin/kubeconfig
+                timeout: 5m
