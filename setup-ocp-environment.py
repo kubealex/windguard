@@ -169,7 +169,14 @@ def main():
     # 11. Apply fleet configuration
     execute_step(
         "Applying fleet configuration",
-        f"sed 's|BOOTC_IMAGE|{env['BOOTC_IMAGE']}|g' rhem-fleet.yml | flightctl apply -f -",
+        f"sed 's|BOOTC_IMAGE|{env['BOOTC_IMAGE']}|g' rhem-windguard-fleet.yml | flightctl apply -f -",
+        env=env
+    )
+
+    # 11.1 Apply fleet configuration
+    execute_step(
+        "Applying fleet configuration",
+        f"flightctl apply -f rhem-windguard-repo",
         env=env
     )
 

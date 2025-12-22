@@ -1,7 +1,6 @@
 FROM registry.redhat.io/rhel9/rhel-bootc:9.6
 
 ARG USHIFT_VER=4.20
-ARG OCP_CLUSTER_DOMAIN
 ARG USER_PASSWD=redhat
 
 # ------------------------------------------------------------
@@ -92,24 +91,9 @@ RUN chmod 600 /etc/crio/openshift-pull-secret && \
 COPY config.yaml /etc/flightctl/
 
 # ------------------------------------------------------------
-# Copy MicroShift configuration and manifests
+# Workaround to prevent SELinux to block manifests update from EM
 # ------------------------------------------------------------
 
-RUN cat > /etc/systemd/system/microshift-make-rshared.service <<'EOF'
-[Unit]
-Description=Make root filesystem shared
-Before=microshift.service
-ConditionVirtualization=container
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mount --make-rshared /
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-COPY files/microshift-config/ /etc/microshift/
-RUN  sed -i \
-        "s|OCP_CLUSTER_DOMAIN|${OCP_CLUSTER_DOMAIN}|g" \
-        /etc/microshift/config.d/dns.yaml
+COPY files/flightctl_agent.pp /tmp/flightctl_agent.pp
+RUN semodule -i /tmp/flightctl_agent.pp
+RUN rm -rf /tmp/flightctl_agent.pp

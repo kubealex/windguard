@@ -1,0 +1,17 @@
+---
+apiVersion: flightctl.io/v1alpha1
+kind: Repository
+metadata:
+  name: windguard-microshift
+spec:
+  type: git
+  url: https://github.com/kubealex/windguard.git
+---
+apiVersion: flightctl.io/v1alpha1
+kind: ResourceSync
+metadata:
+  name: microshift-manifests
+spec:
+  path: /fleet-configuration/
+  repository: windguard-microshift
+  targetRevision: main
