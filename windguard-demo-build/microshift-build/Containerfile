@@ -94,6 +94,6 @@ COPY config.yaml /etc/flightctl/
 # Workaround to prevent SELinux to block manifests update from EM
 # ------------------------------------------------------------
 
-COPY files/flightctl_agent.pp /tmp/flightctl_agent.pp
+COPY flightctl_agent.pp /tmp/flightctl_agent.pp
 RUN semodule -i /tmp/flightctl_agent.pp
 RUN rm -rf /tmp/flightctl_agent.pp

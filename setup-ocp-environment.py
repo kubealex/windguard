@@ -169,7 +169,7 @@ def main():
     # 11.1 Apply fleet configuration
     execute_step(
         "Applying fleet configuration",
-        f"flightctl apply -f rhem-windguard-repo",
+        f"flightctl apply -f rhem-windguard-repo.yml",
         env=env
     )
 
