@@ -41,6 +41,7 @@ metadata:
   name: example
   namespace: httpd
 spec:
+  subdomain: windguard-dashboard
   to:
     kind: Service
     name: example
