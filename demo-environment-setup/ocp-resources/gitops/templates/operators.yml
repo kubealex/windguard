@@ -11,7 +11,7 @@ spec:
     server: {{ .server | default "https://kubernetes.default.svc" }}
   project: {{ .project | default "default" }}
   source:
-    path: "ocp-setup/gitops/operators"
+    path: "demo-environment-setup/ocp-resources/ocp-setup/gitops/operators"
     repoURL: {{ (.source).repoURL | default $.Values.repourl }}
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
   syncPolicy:
@@ -37,7 +37,7 @@ spec:
     name: {{ (.destination).name | default "" }}
   project: {{ .project | default "default" }}
   source:
-    path: {{ (.source).path | default "ocp-setup/gitops/operators-cr" }}
+    path: {{ (.source).path | default "demo-environment-setup/ocp-resources/ocp-setup/gitops/operators-cr" }}
     repoURL: {{ (.source).repoURL | default $.Values.repourl }}
     targetRevision: {{ (.source).targetRevision | default "HEAD" }}
   syncPolicy:

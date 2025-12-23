@@ -1,6 +1,6 @@
 # repoURL: https://gitlab.consulting.redhat.com/rh126-demojam/windguard.git
 repourl: https://github.com/kubealex/windguard.git
-path: ocp-setup/gitops/operators-cr
+path: demo-environment-setup/ocp-resources/ocp-setup/gitops/operators-cr
 components:
   - name: openshift-ai
   - name: openshift-virtualization

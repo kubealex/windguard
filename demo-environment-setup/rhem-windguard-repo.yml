@@ -12,6 +12,6 @@ kind: ResourceSync
 metadata:
   name: microshift-manifests
 spec:
-  path: /fleet-configuration/
+  path: /windguard-fleet/
   repository: windguard-microshift
   targetRevision: main

@@ -39,7 +39,7 @@ spec:
                   KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
       - name: windguard-microshift
         gitRef:
-          path: /fleet-configuration/
+          path: /windguard-fleet/
           repository: windguard-microshift
           targetRevision: main
       - name: microshift-restart

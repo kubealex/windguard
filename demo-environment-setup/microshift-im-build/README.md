@@ -12,7 +12,7 @@ Configuration-driven automation for building MicroShift device images with Fligh
 
 ## Configuration
 
-Only **dynamic values** need to be configured in `config.yaml`:
+Only **dynamic values** need to be configured in `demo-config.yaml`:
 
 ```yaml
 # Red Hat Registry Configuration
@@ -28,7 +28,7 @@ private_registry:
 
 # OpenShift Cluster Configuration
 ocp_cluster:
-  domain: "cluster-k7jhl.dynamic.redhatworkshops.io" # The domain of the cluster, without the *.apps
+  domain: "your-cluster-domain" # The domain of the cluster, without the *.apps
   username: "your-cluster-admin-user"
   password: "your-cluster-password"
 ```

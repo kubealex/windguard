@@ -24,8 +24,6 @@ PACKAGES = [
     "openshift-clients"
 ]
 
-BUILD_DIR = "windguard-demo-build/microshift-build/"
-DEPLOY_DIR = "windguard-demo-deploy/"
 IMAGE_BASE = "windguard-microshift"
 IMAGE_TAG = "demo"
 QCOW2_TAG = "demo-qcow2"
@@ -104,15 +102,6 @@ def main():
         env=env
     )
 
-    # 4. Change to build directory
-    build_dir = Path(BUILD_DIR)
-    if not build_dir.exists():
-        log(f"Error: Build directory '{build_dir}' not found", Colors.RED)
-        sys.exit(1)
-
-    os.chdir(build_dir)
-    log(f"Changed to directory: {build_dir.absolute()}", Colors.BLUE)
-
     # 5. Login to registries
     execute_step(
         "Logging into private registry",
@@ -169,14 +158,14 @@ def main():
     # 11.1 Apply fleet configuration
     execute_step(
         "Applying fleet configuration",
-        f"flightctl apply -f rhem-windguard-repo.yml",
+        f"flightctl apply -f demo-environment-setup/rhem-windguard-repo.yml",
         env=env
     )
 
     # 11. Apply fleet configuration
     execute_step(
         "Applying fleet configuration",
-        f"sed 's|BOOTC_IMAGE|{env['BOOTC_IMAGE']}|g' rhem-windguard-fleet.yml | flightctl apply -f -",
+        f"sed 's|BOOTC_IMAGE|{env['BOOTC_IMAGE']}|g' demo-environment-setup/rhem-windguard-fleet.yml | flightctl apply -f -",
         env=env
     )
 
@@ -220,24 +209,15 @@ def main():
         env=env
     )
 
-    # 15. Deploy to OpenShift Virtualization
-    deploy_dir = Path(DEPLOY_DIR)
-    if not deploy_dir.exists():
-        log(f"Error: Deploy directory '{deploy_dir}' not found", Colors.RED)
-        sys.exit(1)
-
-    os.chdir(deploy_dir)
-    log(f"Changed to directory: {deploy_dir.absolute()}", Colors.BLUE)
-
     execute_step(
         "Creating namespace and services",
-        f"oc apply -f windguard-namespace.yml -f windguard-vm-service.yml -f windguard-vm-routes.yml",
+        f"oc apply -f demo-environment-setup/ocpvirt-windguard-namespace.yml -f demo-environment-setup/ocpvirt-windguard-vm-service.yml -f demo-environment-setup/ocpvirt-windguard-vm-routes.yml",
         env=env
     )
 
     execute_step(
         "Deploying VM to OpenShift Virtualization",
-        f"sed 's|QCOW_IMAGE|{env['QCOW_IMAGE']}|g' windguard-vm-ocpvirt.yml | oc apply -f -",
+        f"sed 's|QCOW_IMAGE|{env['QCOW_IMAGE']}|g' demo-environment-setup/ocpvirt-windguard-vm-ocpvirt.yml | oc apply -f -",
         env=env
     )
 
