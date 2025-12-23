@@ -125,7 +125,8 @@ def apply_manifests():
     # ===========================================================
     # 🧱 BOILERPLATE SECTION — add your manifests below
     # Example:
-    # run_oc_command(['oc', 'apply', '-f', './manifests/namespace.yaml'])
+    run_oc_command(['oc', 'apply', '-f', 'demo-environment-setup/ocp-resources/openshift-gitops-setup.yml'])
+    run_oc_command(['oc', 'apply', '-f', 'demo-environment-setup/ocp-resources/openshift-operators-setup.yml'])
     # run_oc_command(['oc', 'apply', '-f', './manifests/configmap.yaml'])
     # run_oc_command(['oc', 'apply', '-k', './kustomize/overlays/prod'])
     # ===========================================================
