@@ -37,10 +37,10 @@ spec:
                 run: kubectl apply -f /var/local/acm-import/import.yaml
                 envVars:
                   KUBECONFIG: /var/lib/microshift/resources/kubeadmin/kubeconfig
-      - name: windguard-microshift
+      - name: pos-microshift
         gitRef:
-          path: /windguard-fleet/
-          repository: windguard-microshift
+          path: /pos-fleet/
+          repository: pos-microshift
           targetRevision: main
       - name: microshift-restart
         inline:
