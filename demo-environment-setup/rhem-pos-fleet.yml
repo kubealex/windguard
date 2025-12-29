@@ -5,7 +5,7 @@ metadata:
 spec:
  selector:
   matchLabels:
-   fleet: acm
+   fleet: fleet-pos
  template:
   spec:
     os:
