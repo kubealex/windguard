@@ -49,8 +49,18 @@ spec:
               - if:
                 - path: /etc/microshift/manifests/kustomization.yaml
                   op: [created, updated]
+                run: systemctl restart microshift
+                timeout: 5m
+          - path: /etc/flightctl/hooks.d/afterupdating/01-microshift-restart.yaml
+            content: |
+              - if:
                 - path: /etc/microshift/config.d/dns.yaml
                   op: [created, updated]
+                run: systemctl restart microshift
+                timeout: 5m
+          - path: /etc/flightctl/hooks.d/afterupdating/02-microshift-restart.yaml
+            content: |
+              - if:
                 - path: /etc/microshift/ovn.yaml
                   op: [created, updated]
                 run: systemctl restart microshift
