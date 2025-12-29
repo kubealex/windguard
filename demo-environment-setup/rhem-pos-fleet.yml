@@ -1,11 +1,11 @@
 apiVersion: flightctl.io/v1alpha1
 kind: Fleet
 metadata:
- name: fleet-windguard
+ name: fleet-pos
 spec:
  selector:
   matchLabels:
-   fleet: windguard
+   fleet: acm
  template:
   spec:
     os:

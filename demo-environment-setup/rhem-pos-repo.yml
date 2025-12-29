@@ -1,0 +1,17 @@
+---
+apiVersion: flightctl.io/v1alpha1
+kind: Repository
+metadata:
+  name: pos-microshift
+spec:
+  type: git
+  url: https://github.com/kubealex/windguard.git
+---
+apiVersion: flightctl.io/v1alpha1
+kind: ResourceSync
+metadata:
+  name: pos-manifests
+spec:
+  path: /pos-fleet/
+  repository: pos-microshift
+  targetRevision: main
