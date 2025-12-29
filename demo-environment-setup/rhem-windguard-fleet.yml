@@ -69,7 +69,7 @@ spec:
             content: |-
               - if:
                 - path: /etc/microshift/manifests/kustomization.yaml
-                  op: [removed]
+                  op: [removed, updated]
                 run: oc delete -k /etc/microshift/manifests/ --kubeconfig /var/lib/microshift/resources/kubeadmin/kubeconfig
                 timeout: 5m
     systemd:
