@@ -1,0 +1,16 @@
+# Red Hat Registry Configuration
+redhat_registry:
+  username: "your-redhat-username"
+  password: "your-redhat-password"
+
+# Private Registry Configuration (Quay.io or custom)
+private_registry:
+  url: "quay.io"  # Change if using different registry
+  username: "your-registry-user"
+  password: "your-registry-password"
+
+# OpenShift Cluster Configuration
+ocp_cluster:
+  domain: "your-cluster.example.com"  # The cluster domain without .apps
+  username: "your-cluster-username"
+  password: "your-cluster-password"
