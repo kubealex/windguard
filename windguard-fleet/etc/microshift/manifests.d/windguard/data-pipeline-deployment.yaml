@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-pipeline-deployment
+  namespace: windguard
+  labels:
+    app: data-pipeline
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-pipeline
+  template:
+    metadata:
+      labels:
+        app: data-pipeline
+    spec:
+      containers:
+      - name: data-pipeline
+        image: quay.io/luferrar/windguard:data-pipeline
+        command: ["python", "data_pipeline.py"]
+        imagePullPolicy: Always
+        env:
+        - name: MQTT_BROKER_ADDRESS
+          value: "mosquitto.mqtt-broker.svc.cluster.local" # Updated for K8s service name
+        - name: MQTT_BROKER_PORT
+          value: "1883"
+        - name: MQTT_USERNAME
+          value: "admin"
+        - name: MQTT_PASSWORD
+          value: "password"    
+        - name: SCORING_API_URL
+          value: "http://onnx-model-predictor.windguard.svc.cluster.local:8080/predict" # Updated for K8s service name
+        - name: DATA_PATH
+          value: "/app/iiot-combined-dataset.csv" # This path is inside the container
+        - name: MQTT_TOPIC_FEATURES
+          value: "windguard/features"
+        - name: MQTT_TOPIC_FAULT
+          value: "windguard/fault/prediction"
+        - name: MQTT_TOPIC_MONITORING
+          value: "windguard/monitoring"
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "250m" # 0.25 of a CPU core
+          limits:
+            memory: "512Mi"
+            cpu: "500m" # 0.5 of a CPU core

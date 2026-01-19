@@ -1,0 +1,4 @@
+resources:
+- data-pipeline-ns.yaml
+- data-pipeline-deployment.yaml
+- inference-svc-deployment.yaml
