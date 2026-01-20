@@ -33,7 +33,7 @@ IMAGE_BASE = "windguard-microshift"
 IMAGE_TAG = "demo"
 QCOW2_TAG = "demo-qcow2"
 BOOTC_BUILDER = "registry.redhat.io/rhel9/bootc-image-builder:latest"
-BUILD_DIR = "windguard-demo-build/microshift-build"
+BUILD_DIR = "demo-environment-setup/microshift-im-build"
 
 def log(message, color=Colors.GREEN):
     """Print colored log message"""
