@@ -218,7 +218,7 @@ def main():
 
     execute_step(
         "Pushing bootc image to registry",
-        f"podman push {env['BOOTC_IMAGE']}",
+        f"podman push {env['BOOTC_IMAGE']} --authfile=auth.json",
         env=env
     )
 
@@ -250,7 +250,7 @@ def main():
 
     execute_step(
         "Pushing QCOW2 container image to registry",
-        f"podman push {env['QCOW_IMAGE']}",
+        f"podman push {env['QCOW_IMAGE']} --authfile=auth.json",
         env=env
     )
 
