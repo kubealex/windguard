@@ -33,19 +33,20 @@ IMAGE_BASE = "windguard-microshift"
 IMAGE_TAG = "demo"
 QCOW2_TAG = "demo-qcow2"
 BOOTC_BUILDER = "registry.redhat.io/rhel9/bootc-image-builder:latest"
+BUILD_DIR = "windguard-demo-build/microshift-build"
 
 def log(message, color=Colors.GREEN):
     """Print colored log message"""
     print(f"{color}{message}{Colors.NC}")
 
-def execute_step(step_name, command, shell=True, env=None):
+def execute_step(step_name, command, shell=True, env=None, cwd=None):
     """Execute a command with logging and error handling"""
     log(f"\n[STEP] {step_name}", Colors.BLUE)
     try:
         if isinstance(command, list):
-            subprocess.run(command, check=True, capture_output=False, env=env)
+            subprocess.run(command, check=True, capture_output=False, env=env, cwd=cwd)
         else:
-            subprocess.run(command, shell=shell, check=True, env=env)
+            subprocess.run(command, shell=shell, check=True, env=env, cwd=cwd)
         log(f"[SUCCESS] {step_name}", Colors.GREEN)
         return True
     except subprocess.CalledProcessError as e:
@@ -53,7 +54,7 @@ def execute_step(step_name, command, shell=True, env=None):
         log(f"Error: {e}", Colors.RED)
         sys.exit(1)
 
-def get_command_output(command, shell=True):
+def get_command_output(command, shell=True, cwd=None):
     """Execute command and return output"""
     try:
         result = subprocess.run(
@@ -61,7 +62,8 @@ def get_command_output(command, shell=True):
             shell=shell,
             capture_output=True,
             text=True,
-            check=True
+            check=True,
+            cwd=cwd
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError as e:
@@ -114,8 +116,15 @@ def main():
     config = load_config(config_file)
     env, redhat_reg, private_reg, ocp, ocp_api_url = setup_environment(config)
 
+    # Verify build directory exists
+    build_path = Path(BUILD_DIR)
+    if not build_path.exists():
+        log(f"Error: Build directory '{BUILD_DIR}' not found", Colors.RED)
+        sys.exit(1)
+
     # Display configuration
     log("\n=== WindGuard Edge Image Build ===", Colors.GREEN)
+    log(f"Build Directory: {BUILD_DIR}", Colors.YELLOW)
     log(f"OCP Domain: {env['OCP_CLUSTER_DOMAIN']}", Colors.YELLOW)
     log(f"Private Registry: {env['REGISTRY_URL']}/{env['REGISTRY_USER']}", Colors.YELLOW)
     log(f"Bootc Image: {env['BOOTC_IMAGE']}", Colors.YELLOW)
@@ -143,13 +152,15 @@ def main():
     execute_step(
         "Logging into private registry",
         f"podman login {private_reg['url']} --username {private_reg['username']} --password {private_reg['password']} --authfile=auth.json",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     execute_step(
         "Logging into registry.redhat.io",
         f"podman login registry.redhat.io --username {redhat_reg['username']} --password {redhat_reg['password']} --authfile=auth.json",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     # Login to OpenShift
@@ -164,7 +175,8 @@ def main():
     execute_step(
         "Extracting OpenShift pull secret",
         "oc get secret/pull-secret -n openshift-config --template='{{index .data \".dockerconfigjson\" | base64decode}}' > pull-secret",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     # Get FlightCtl API URL and login
@@ -191,7 +203,8 @@ def main():
     execute_step(
         "Requesting FlightCtl enrollment certificate",
         "flightctl certificate request --signer=enrollment --expiration=365d --output=embedded > config.yaml",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     # Build bootc image
@@ -199,7 +212,8 @@ def main():
     execute_step(
         "Building bootc container image",
         f"podman build --rm --no-cache --build-arg OCP_CLUSTER_DOMAIN={env['OCP_CLUSTER_DOMAIN']} -t {env['BOOTC_IMAGE']} .",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     execute_step(
@@ -210,7 +224,7 @@ def main():
 
     # Build QCOW2 image
     log("\n=== Building QCOW2 Disk Image ===", Colors.GREEN)
-    output_path = Path("output").absolute()
+    output_path = (build_path / "output").absolute()
     output_path.mkdir(exist_ok=True)
 
     execute_step(
@@ -221,7 +235,8 @@ def main():
         f"-v ./config.toml:/config.toml "
         f"-v /var/lib/containers/storage:/var/lib/containers/storage "
         f"{BOOTC_BUILDER} --type qcow2 {env['BOOTC_IMAGE']}",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     # Build and push QCOW2 container
@@ -229,7 +244,8 @@ def main():
     execute_step(
         "Building QCOW2 container image",
         f"podman build --rm --no-cache -t {env['QCOW_IMAGE']} -f Containerfile.ocpvirt .",
-        env=env
+        env=env,
+        cwd=BUILD_DIR
     )
 
     execute_step(
