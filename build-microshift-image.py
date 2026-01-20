@@ -218,6 +218,7 @@ def main():
         f"podman run --rm -it --privileged --pull=newer "
         f"--security-opt label=type:unconfined_t "
         f"-v {output_path}:/output "
+        f"-v ./config.toml:/config.toml "
         f"-v /var/lib/containers/storage:/var/lib/containers/storage "
         f"{BOOTC_BUILDER} --type qcow2 {env['BOOTC_IMAGE']}",
         env=env
