@@ -211,7 +211,7 @@ def main():
     log("\n=== Building Bootable Container Image ===", Colors.GREEN)
     execute_step(
         "Building bootc container image",
-        f"podman build --rm --no-cache --build-arg OCP_CLUSTER_DOMAIN={env['OCP_CLUSTER_DOMAIN']} -t {env['BOOTC_IMAGE']} .",
+        f"podman build --rm --no-cache -t {env['BOOTC_IMAGE']} .",
         env=env,
         cwd=BUILD_DIR
     )

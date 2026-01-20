@@ -1,0 +1,9 @@
+resources:
+- mosquitto/mosquitto-ns.yaml
+- mosquitto/mosquitto-config.yaml
+- mosquitto/mosquitto-password.yaml
+- mosquitto/mosquitto.yaml
+- mosquitto/mosquitto-node.yaml
+- windguard/data-pipeline-ns.yaml
+- windguard/inference-svc-deployment.yaml
+- windguard/data-pipeline-deployment.yaml
