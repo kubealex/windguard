@@ -10,3 +10,16 @@ spec:
     name: windguard-demo-vm-http
   port:
     targetPort: http
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: pos-demo-dashboard
+  namespace: windguard-demo
+spec:
+  subdomain: pos-dashboard
+  to:
+    kind: Service
+    name: windguard-demo-vm-http
+  port:
+    targetPort: http
