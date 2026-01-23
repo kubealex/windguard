@@ -41,7 +41,7 @@ metadata:
   name: tailwind-pos
   namespace: tailwind-pos
 spec:
-  subdomain: windguard-dashboard
+  subdomain: pos-dashboard
   to:
     kind: Service
     name: tailwind-pos
