@@ -5,7 +5,6 @@ resources:
 - mosquitto/mosquitto.yaml
 - mosquitto/mosquitto-node.yaml
 - windguard/data-pipeline-ns.yaml
-- windguard/inference-svc-deployment.yaml
 - windguard/data-pipeline-deployment.yaml
 - windguard/inference-svc-deployment.yaml
 - windguard/node-red-node.yaml
