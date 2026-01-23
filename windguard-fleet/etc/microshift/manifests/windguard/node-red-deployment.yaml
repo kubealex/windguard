@@ -19,6 +19,15 @@ spec:
       - name: node-red
         image: quay.io/luferrar/windguard:hmi
         imagePullPolicy: Always
+        env:
+        - name: MQTT_HOST
+          value: "mosquitto.mqtt-broker.svc.cluster.local" # Updated for K8s service name
+        - name: MQTT_PORT
+          value: "1883"
+        - name: MQTT_USER
+          value: "admin"
+        - name: MQTT_PWD
+          value: "password"    
         ports:
         - containerPort: 1880
           name: http
