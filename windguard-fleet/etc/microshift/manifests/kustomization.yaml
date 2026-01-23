@@ -9,3 +9,5 @@ resources:
 - windguard/inference-svc-deployment.yaml
 - windguard/node-red-node.yaml
 - windguard/node-red-deployment.yaml
+- windguard/animation-deployment.yaml
+- windguard/animation-node.yaml
