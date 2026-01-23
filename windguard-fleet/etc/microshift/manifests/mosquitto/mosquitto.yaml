@@ -11,20 +11,20 @@ spec:
   selector:
     app: mosquitto
   type: ClusterIP
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mq-pv-claim
-  namespace: mqtt-broker
-  labels:
-    app: mosquitto
-spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
+#---
+#apiVersion: v1
+#kind: PersistentVolumeClaim
+#metadata:
+#  name: mq-pv-claim
+#  namespace: mqtt-broker
+#  labels:
+#    app: mosquitto
+#spec:
+#  accessModes:
+#  - ReadWriteOnce
+#  resources:
+#    requests:
+#      storage: 2Gi
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -61,7 +61,7 @@ spec:
             subPath: password.txt
       volumes:
       - name: mosquitto-persistent-storage
-        emptyDir:
+        emptyDir: {}
         # persistentVolumeClaim:
           # claimName: mq-pv-claim
       - name: mosquitto-config
