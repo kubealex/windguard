@@ -4,7 +4,7 @@ metadata:
   name: node-red-nodeport
   namespace: windguard
 spec:
-  type: NodePort 
+  type: NodePort
   ports:
     - name: nodered-port
       nodePort: 31880
@@ -13,3 +13,16 @@ spec:
       protocol: TCP
   selector:
     app: node-red
+---
+kind: Route
+apiVersion: route.openshift.io/v1
+metadata:
+  name: windguard
+  namespace: windguard
+spec:
+  subdomain: windguard-dashboard
+  to:
+    kind: Service
+    name: node-red-nodeport
+  port:
+    targetPort: 1880
